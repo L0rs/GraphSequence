@@ -1,9 +1,9 @@
 import sys
 from PyQt5.QtTest import QTest as qtst
-from PyQt5.QtWidgets import (QDialog, QApplication, QPushButton, QVBoxLayout,
-                             QLabel, QLineEdit, QHBoxLayout, QMessageBox, QMainWindow)
-from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QSize
+from PyQt5.QtWidgets import *#(QDialog, QApplication, QPushButton, QVBoxLayout,
+                             #QLabel, QLineEdit, QHBoxLayout, QMessageBox, QMainWindow)
+from PyQt5.QtGui import *#QIcon
+from PyQt5.QtCore import *#QSize
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
@@ -18,6 +18,7 @@ class Window(QDialog):
     range_i = 0
     running = False
     function = "1/n"
+    linesOnOff = "*"
     def __init__(self, parent=None):
         super(Window, self).__init__(parent)
         w = 1920
@@ -27,8 +28,27 @@ class Window(QDialog):
         myappid = 'mycompany.myproduct.subproduct.version' # arbitrary string
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
-        
         self.setWindowIcon(QIcon("Icons/ape256.png"))
+
+
+        #create menuBar that user can change some settings
+        self.myQMenuBar = QMenuBar(self)
+        menuFile = self.myQMenuBar.addMenu("File")
+        menuEdit = self.myQMenuBar.addMenu("Edit")
+        menuHelp = self.myQMenuBar.addMenu("Help")
+
+        #subMenu
+        actQuit = QAction('Quit', self) 
+        actQuit.triggered.connect(self.closeEvent)
+        graphStyle = QAction('Lines On/Off', self) 
+        graphStyle.triggered.connect(self.setLinesOnOff)
+
+
+
+        #set events for my menuBar
+        menuFile.addAction(actQuit)
+        menuEdit.addAction(graphStyle)
+
         # a figure instance to plot on
         self.figure = plt.figure()
         # this is the Canvas Widget that displays the `figure`
@@ -71,6 +91,7 @@ class Window(QDialog):
         
         # set the layout --> vertical layout --> widgets or whole layouts placed one below the other
         layout = QVBoxLayout()
+        layout.addWidget(self.myQMenuBar)
         layout.addWidget(self.toolbar)
         layout.addLayout(hbox2)
         layout.addWidget(self.canvas)
@@ -81,7 +102,10 @@ class Window(QDialog):
         layout.addWidget(self.button3)
         
         self.setLayout(layout)
-
+    def setLinesOnOff(self):
+        self.linesOnOff = "*-" if self.linesOnOff == "*" else "*"
+        if self.running == False and self.range_i>0:
+            self.plot()
     def setFunction(self):
         input_sequence = self.textbox2.text()
        
@@ -147,7 +171,7 @@ class Window(QDialog):
             ax = self.figure.add_subplot(111)
             ax.clear()
 
-            ax.plot(x,y, '*')
+            ax.plot(x,y, self.linesOnOff)#'*-'
             # refresh canvas
             self.canvas.draw()
             
