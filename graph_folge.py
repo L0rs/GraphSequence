@@ -1,9 +1,8 @@
 import sys
 from PyQt5.QtTest import QTest as qtst
-from PyQt5.QtWidgets import *#(QDialog, QApplication, QPushButton, QVBoxLayout,
-                             #QLabel, QLineEdit, QHBoxLayout, QMessageBox, QMainWindow)
-from PyQt5.QtGui import *#QIcon
-from PyQt5.QtCore import *#QSize
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
@@ -24,7 +23,7 @@ class Window(QDialog):
         w = 1920
         h = 1080
         self.resize(w,h)
-        self.setWindowTitle("SequenceProgram by Lars Stockum")
+        self.setWindowTitle("SequenceProgram")
         myappid = 'mycompany.myproduct.subproduct.version' # arbitrary string
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
@@ -42,13 +41,17 @@ class Window(QDialog):
         actQuit.triggered.connect(self.closeEvent)
         graphStyle = QAction('Lines On/Off', self) 
         graphStyle.triggered.connect(self.setLinesOnOff)
-
+        readme = QAction('Information',self)
+        message = "This program is created by Lars Stockum"
+        title = "Information"
+        messageIcon = QMessageBox.Information
+        readme.triggered.connect(lambda *args, message=message, title=title, messageIcon=messageIcon: self.message_box(message, title, messageIcon)) 
 
 
         #set events for my menuBar
         menuFile.addAction(actQuit)
         menuEdit.addAction(graphStyle)
-
+        menuHelp.addAction(readme)
         # a figure instance to plot on
         self.figure = plt.figure()
         # this is the Canvas Widget that displays the `figure`
@@ -132,9 +135,9 @@ class Window(QDialog):
                 self.range_i = textboxValue_int 
                 self.plot()
 
-    def message_box(self, text, title):
+    def message_box(self, text, title, icon = QMessageBox.Critical):
         msg = QMessageBox()
-        msg.setIcon(QMessageBox.Critical)
+        msg.setIcon(icon) 
         msg.setText(text)
         msg.setWindowTitle(title)
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
